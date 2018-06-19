@@ -29,13 +29,6 @@
                 <td>Description</td>
                 <td>Link</td>
               </tr>
-              <tr>
-                <td>1</td>
-                <td>2</td>
-                <td>3</td>
-                <td>4</td>
-                <td>5</td>
-              </tr>
 							<?php
 
 							$row = 1;
@@ -87,8 +80,8 @@
             if(isset($_POST['submit_video_info'])) {
 
 							$row = 1;
-								if (($handle_match = fopen("video_info.csv", "r")) !== FALSE) {
-									while (($data_match = fgetcsv($handle_match, 1000, ",")) !== FALSE) {
+								if (($url_match = fopen("video_info.csv", "r")) !== FALSE) {
+									while (($data_match = fgetcsv($url_match, 1000, ",")) !== FALSE) {
 										$num_match = count($data_match);
 										$row++;
 										for ($c=4; $c < $num_match; $c++) {
@@ -110,7 +103,7 @@
 										file_put_contents('video_info.csv', $infoArray, FILE_APPEND | LOCK_EX);
 										header('location: index.php');
 									}
-								fclose($handle_match);
+								fclose($url_match);
 								}
             }
           ?>
@@ -118,8 +111,6 @@
 				</div>
 			</div>
 		</div>
-
-	<?php echo COUNT($all_table_rows); ?>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
   	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
   </body>
