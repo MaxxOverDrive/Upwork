@@ -12,6 +12,18 @@
       <div class="row">
 				<div class="col-md-12">
 
+
+					<div class="form-group">
+						<div class="col-md-1">
+								<select class="form-control form-control-sm">
+									<option>10</option>
+									<option>25</option>
+									<option>50</option>
+									<option>100</option>
+								</select>
+						</div>
+					</div>
+
 					<form ation="index.php" method="POST">
 						<div class="form-group">
 							<div class="col-md-4 col-md-offset-7">
@@ -23,8 +35,22 @@
 					<?php
 						if(isset($_POST['submit_search'])) {
 							$user_search = $_POST['user_search'];
-							include('db_conn.php');
 
+							$row = 1;
+								if (($search_handle = fopen("TestTable.csv", "r")) !== FALSE) {
+									while (($data = fgetcsv($search_handle, 1000, ",")) !== FALSE) {
+										$num = count($data);
+										$row++;
+
+										echo '<tr>';
+										for ($c=0; $c < $num; $c++) {
+												echo '<td scope="col">' . $data[$c] . '</td>';
+
+										}
+										echo '</tr>';
+									}
+								fclose($search_handle);
+								}
 						}
 					?>
 
@@ -44,21 +70,22 @@
             </thead>
             <tbody>
 							<?php
-								include('db_conn.php');
-								$tableVar = $GLOBALS['tableResult'];
 
-								while($tableRow = mysqli_fetch_assoc($tableVar)) { ?>
-									<tr>
-		                <td scope="col"><?php echo $tableRow['artist_name']; ?></td>
-		                <td scope="col"><?php echo $tableRow['channel_name']; ?></td>
-		                <td scope="col"><?php echo $tableRow['song_name']; ?></td>
-		                <td scope="col"><?php echo $tableRow['video_desc']; ?></td>
-		                <td scope="col"><?php echo $tableRow['youtube_link']; ?></td>
-		              </tr>
+							$row = 1;
+								if (($handle = fopen("TestTable.csv", "r")) !== FALSE) {
+									while (($data = fgetcsv($handle, 1000, ",")) !== FALSE) {
+										$num = count($data);
+										$row++;
+										echo '<tr>';
+										for ($c=0; $c < $num; $c++) {
+												echo '<td scope="col">' . $data[$c] . '</td>';
 
-								<?php	}
-								?>
-
+										}
+										echo '</tr>';
+									}
+								fclose($handle);
+								}
+							 ?>
             </tbody>
           </table>
 
@@ -92,10 +119,33 @@
 
           <?php
             if(isset($_POST['submit_video_info'])) {
-							include('formSubmit.php');
 
-
-
+							$row = 1;
+								if (($url_match = fopen("TestTable.csv", "r")) !== FALSE) {
+									while (($data_match = fgetcsv($url_match, 1000, ",")) !== FALSE) {
+										$num_match = count($data_match);
+										$row++;
+										for ($c=4; $c < $num_match; $c++) {
+												$data_check_array[] = $data_match[$c];
+										}
+									}
+									if(in_array($_POST['youtube_link'], $data_check_array)) {
+										echo "This URL already exists!";
+									}
+									else {
+										$infoCheck = file_get_contents('TestTable.csv');
+										$video_info = $_POST['artist_name'];
+										$channel_name = $_POST['channel_name'];
+										$song_name = $_POST['song_name'];
+										$video_desc = $_POST['video_desc'];
+										$youtube_link = $_POST['youtube_link'];
+										$info_array_temp = implode(',', array($video_info, $channel_name, $song_name, $video_desc, $youtube_link));
+										$infoArray = $info_array_temp.PHP_EOL;
+										file_put_contents('TestTable.csv', $infoArray, FILE_APPEND | LOCK_EX);
+										header('location: index.php');
+									}
+								fclose($url_match);
+								}
             }
           ?>
 
