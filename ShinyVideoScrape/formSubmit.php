@@ -8,34 +8,54 @@ $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
   }
   else {
 
-    $artist_name = $_POST['artist_name'];
-    $channel_name = $_POST['channel_name'];
-    $song_name = $_POST['song_name'];
-    $video_desc = $_POST['video_desc'];
-    $youtube_link = $_POST['youtube_link'];
+    $checkSQL = "SELECT youtube_link FROM VideoURL";
 
-    $checkSQL = "SELECT * FROM VideoURL WHERE youtube_link == '$youtube_link'";
     $checkResult = mysqli_query($conn, $checkSQL);
 
     if(mysqli_num_rows($checkResult) > 0) {
-      echo "<h3>This URL already exists</h3>";
+
+      $GLOBALS['chechResult'] = $checkResult;
+
     }
+
+    else {
+      echo "YOUR TITTIES ARE ON THE FLOOR!";
+    }
+
+    $youtube_link = $_POST['youtube_link'];
+
+    $checkVar = $GLOBALS['checkResult'];
+
+    while($checkRow = mysqli_fetch_assoc($checkVar)) {
+      $checkArray[] = $checkRow['youtube_link'];
+    }
+
+    if(in_array($youtube_link, $checkArray)) {
+      echo "<h3>This link already exists, Please choose another!</h3>";
+    }
+
     else {
 
+      $artist_name = $_POST['artist_name'];
+      $channel_name = $_POST['channel_name'];
+      $song_name = $_POST['song_name'];
+      $video_desc = $_POST['video_desc'];
+
       $insertSQL = "INSERT INTO VideoURL (artist_name, channel_name, song_name, video_desc, youtube_link)
-      VALUES ('$artist_name', '$channel_name', '$song_name', '$video_desc', '$youtube_link')";
+                    VALUES ('$artist_name', '$channel_name', '$song_name', '$video_desc', '$youtube_link')";
+
       $insertResult = mysqli_query($conn, $insertSQL);
 
       if(mysqli_affected_rows($conn) > 0) {
         echo "<h3>Your information has been entered!</h3>";
         header('location:index.php');
       }
+
       else {
         echo "Nothing Happened!";
       }
 
     }
-
 
   }
   mysqli_close($conn);

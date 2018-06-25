@@ -12,28 +12,36 @@
       <div class="row">
 				<div class="col-md-12">
 
-					<form ation="index.php" method="POST">
-						<div class="form-group">
-							<div class="col-md-4 col-md-offset-7">
-								<input type="text" name="user_search">
-								<button class="btn btn-light" type="submit" name="submit_search">Search</button>
-							</div>
-						</div>
-					</form>
-					<?php
-						if(isset($_POST['submit_search'])) {
-							$user_search = $_POST['user_search'];
-							include('db_conn.php');
+					<div class="col-md-5 col-md-offset-7">
+						<h3 class="text-center">Search Table</h3>
+						<form class="form-inline" id="search_form" ation="index.php" method="POST">
 
-						}
-					?>
+							<div class="form-group">
+								<div class="col-md-12">
+
+									<div class="col-md-7">
+
+										<input type="text" name="user_input">
+
+									</div>
+
+									<div class="col-md-2">
+
+										<button class="btn btn-light" type="submit" name="user_search_submit">Search</button>
+
+									</div>
+								</div>
+							</div>
+
+						</form>
+					</div>
 
 				</div>
 			</div>
 			<div class="row">
 				<div class="col-md-12">
           <table class="table table-striper table-hover dataTable">
-            <thead>
+            <thead style="font-weight: bold; font-size: 115%;" class="text-center">
               <tr>
                 <td scope="col">Artist Name</td>
                 <td scope="col">Channel Name</td>
@@ -44,25 +52,64 @@
             </thead>
             <tbody>
 							<?php
-								include('db_conn.php');
-								$tableVar = $GLOBALS['tableResult'];
 
-								while($tableRow = mysqli_fetch_assoc($tableVar)) { ?>
-									<tr>
-		                <td scope="col"><?php echo $tableRow['artist_name']; ?></td>
-		                <td scope="col"><?php echo $tableRow['channel_name']; ?></td>
-		                <td scope="col"><?php echo $tableRow['song_name']; ?></td>
-		                <td scope="col"><?php echo $tableRow['video_desc']; ?></td>
-		                <td scope="col"><?php echo $tableRow['youtube_link']; ?></td>
-		              </tr>
+								if(isset($_POST['user_input'])) {
 
-								<?php	}
-								?>
+									$user_input = $_POST['user_input'];
+
+										include('search_conn.php');
+										$searchVar = $GLOBALS['searchResult'];
+
+										while($searchRow = mysqli_fetch_assoc($searchVar)) {
+
+											$artist_name[] = $searchRow['artist_name'];
+											$channel_name[] = $searchRow['channel_name'];
+											$song_name[] = $searchRow['song_name'];
+											$video_desc[] = $searchRow['video_desc'];
+											$youtube_link[] = $searchRow['youtube_link'];
+										}
+
+										for($i = 0; $i <= COUNT($youtube_link); $i++) {
+
+											if(strpos($artist_name[$i], $user_input) || strpos($channel_name[$i], $user_input) || strpos($song_name[$i], $user_input) || strpos($video_desc[$i], $user_input) || strpos($youtube_link[$i], $user_input) === true) { ?>
+													 <tr>
+														 <td scope="col"><?php echo $artist_name[$i]; ?></td>
+														 <td scope="col"><?php echo $channel_name[$i]; ?></td>
+														 <td scope="col"><?php echo $song_name[$i]; ?></td>
+														 <td scope="col"><?php echo $video_desc[$i]; ?></td>
+														 <td scope="col"><?php echo $youtube_link[$i]; ?></td>
+													 </tr>
+
+											 <?php
+											}
+											else {
+												continue;
+											}
+										}
+
+								}
+
+								else {
+
+												include('table_conn.php');
+
+												$tableVar = $GLOBALS['tableResult'];
+
+												while($tableRow = mysqli_fetch_assoc($tableVar)) { ?>
+																<tr>
+									                <td scope="col"><?php echo $tableRow['artist_name']; ?></td>
+									                <td scope="col"><?php echo $tableRow['channel_name']; ?></td>
+									                <td scope="col"><?php echo $tableRow['song_name']; ?></td>
+									                <td scope="col"><?php echo $tableRow['video_desc']; ?></td>
+									                <td scope="col"><a href="<?php echo $tableRow['youtube_link']; ?>"><?php echo $tableRow['youtube_link']; ?></a></td>
+									              </tr>
+
+												<?php	}
+						}	?>
 
             </tbody>
           </table>
-
-
+				
           <form action="index.php" method="POST">
 
             <div class="form-group">
@@ -93,8 +140,6 @@
           <?php
             if(isset($_POST['submit_video_info'])) {
 							include('formSubmit.php');
-
-
 
             }
           ?>
