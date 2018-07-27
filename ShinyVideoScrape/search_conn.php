@@ -1,6 +1,7 @@
 <?php
 
 
+
 $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
 
   if(!$conn) {
@@ -8,7 +9,8 @@ $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
   }
   else {
 
-    $searchSQL = "SELECT * FROM VideoURL";
+    $searchSQL = "SELECT * FROM VideoURL WHERE [song_name] LIKE '%$user_input%'";
+
 
     $searchResult = mysqli_query($conn, $searchSQL);
 

@@ -1,6 +1,7 @@
 <?php
 
 
+
 $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
 
   if(!$conn) {
@@ -19,7 +20,7 @@ $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
     }
 
     else {
-      echo "YOUR TITTIES ARE ON THE FLOOR!";
+      echo "No Connection";
     }
 
     $youtube_link = $_POST['youtube_link'];
@@ -40,9 +41,10 @@ $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
       $channel_name = $_POST['channel_name'];
       $song_name = $_POST['song_name'];
       $video_desc = $_POST['video_desc'];
+      $verified = '';
 
-      $insertSQL = "INSERT INTO VideoURL (artist_name, channel_name, song_name, video_desc, youtube_link)
-                    VALUES ('$artist_name', '$channel_name', '$song_name', '$video_desc', '$youtube_link')";
+      $insertSQL = "INSERT INTO VideoURL (artist_name, channel_name, song_name, video_desc, youtube_link, verified)
+                    VALUES ('$artist_name', '$channel_name', '$song_name', '$video_desc', '$youtube_link', '$verified')";
 
       $insertResult = mysqli_query($conn, $insertSQL);
 
@@ -59,4 +61,5 @@ $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
 
   }
   mysqli_close($conn);
+
 ?>

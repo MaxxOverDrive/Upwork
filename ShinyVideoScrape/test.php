@@ -55,24 +55,23 @@
 
 								if(isset($_POST['user_input']) && !empty($_POST['user_input'])) {
 
-									$user_input = $_POST['user_input'];
+									$user_input = bin2hex($_POST['user_input']);
 
 										include('search_conn.php');
 
 										$searchVar = $GLOBALS['searchResult'];
 
 										while($searchRow = mysqli_fetch_assoc($searchVar)) {
-
-											$artist_name[] = $searchRow['artist_name'];
-											$channel_name[] = $searchRow['channel_name'];
-											$song_name[] = $searchRow['song_name'];
-											$video_desc[] = $searchRow['video_desc'];
-											$youtube_link[] = $searchRow['youtube_link'];
+											$artist_name[] = bin2hex($searchRow['artist_name']);
+											$channel_name[] = bin2hex($searchRow['channel_name']);
+											$song_name[] = bin2hex($searchRow['song_name']);
+											$video_desc[] = bin2hex($searchRow['video_desc']);
+											$youtube_link[] = bin2hex($searchRow['youtube_link']);
 										}
 
 										for($i = 0; $i <= COUNT($youtube_link); $i++) {
 
-											if(strpos($artist_name[$i], $user_input) || strpos($channel_name[$i], $user_input) || strpos($song_name[$i], $user_input) || strpos($video_desc[$i], $user_input) || strpos($youtube_link[$i], $user_input) === true) { ?>
+											if(strpos($song_name[$i], $user_input)  === true) { ?>
 													 <tr>
 														 <td scope="col"><?php echo $artist_name[$i]; ?></td>
 														 <td scope="col"><?php echo $channel_name[$i]; ?></td>

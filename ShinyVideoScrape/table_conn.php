@@ -1,6 +1,7 @@
 <?php
 
 
+
 $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
 
   if(!$conn) {
@@ -8,7 +9,7 @@ $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
   }
   else {
 
-    $tableSQL = "SELECT artist_name, channel_name, song_name, video_desc, youtube_link FROM VideoURL LIMIT 10";
+    $tableSQL = "SELECT artist_name, channel_name, song_name, video_desc, youtube_link FROM VideoURL";
 
     $tableResult = mysqli_query($conn, $tableSQL);
 

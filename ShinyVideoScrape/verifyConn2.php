@@ -18,7 +18,6 @@ $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
 
     if(mysqli_affected_rows($conn) > 0) {
       echo("You verified $N video(s): ");
-      header('location:verify.php');
     }
 
     mysqli_close($conn);
