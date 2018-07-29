@@ -3,7 +3,8 @@ error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
   if(isset($_POST['compare_submit'])) {
-    
+
+  
 
     $conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
 
@@ -20,8 +21,10 @@ ini_set('display_errors', '1');
            <tr>
              <td scope="col">School</td>
              <td scope="col">Phone</td>
-             <td scope="col">City</td>
              <td scope="col">County</td>
+             <td scope="col">Mailing Address</td>
+             <td scope="col">Physical Address</td>
+             <td scope="col">Approved Programs</td>
            </tr>
          </thead>
          <tbody>
@@ -42,16 +45,18 @@ ini_set('display_errors', '1');
          }
          curl_close($ch);
 
-         $total = 0;
          $newSchool = 0;
          $newPhoneNumber = 0;
-         $newCity = 0;
          $newCounty = 0;
          $newMailingAddress = 0;
          $newPhysicalAddress = 0;
+         $new_approved_program = 0;
          $same_school = 0;
+         $total = 0;
+
          $curl = curl_init();
-         for($i = 18; $i < (COUNT($school_Row) - 3); $i++) {
+         //(COUNT($school_Row) - 3)
+         for($i = 18; $i < 100; $i++) {
            ini_set('memory_limit', '1024M');
            ini_set('max_execution_time', 300);
            $school_URL = "https://app.dca.ca.gov/bppe/";
@@ -65,44 +70,50 @@ ini_set('display_errors', '1');
              if(preg_match_all('/<td>([\s\S]*?)<\/td>/', $school_result, $school_pages)) {
                $approvedPrograms = array();
                for($a = 0; $a < COUNT($school_pages[1]); $a++) {
-                   $school = trim($school_pages[1][0]);
-                   $phone = trim($school_pages[1][1]);
+                   $school_scrape = trim($school_pages[1][0]);
+                   $phone_scrape = trim($school_pages[1][1]);
                    $replace_array = array(')', '(', ' ');
-                   $new_phone = trim(str_replace($replace_array, '', $phone));
-                   $schoolCode = trim($school_pages[1][2]);
-                   $county = trim($school_pages[1][3]);
-                   $mailingAddress = trim(preg_replace('/&nbsp;|<br \/>/', '', $school_pages[1][4]));
-                   $physicalAddress = trim(preg_replace('/&nbsp;|<br \/>/', '', $school_pages[1][5]));
+                   $new_phone = trim(str_replace($replace_array, '', $phone_scrape));
+                   $school_code_scrape = trim($school_pages[1][2]);
+                   $county_scrape = trim($school_pages[1][3]);
+                   $mailing_address_scrape = trim(preg_replace('/&nbsp;|<br \/>|\n/', '', $school_pages[1][4]));
+                   $physical_address_scrape = trim(preg_replace('/&nbsp;|<br \/>|\n/', '', $school_pages[1][5]));
                  if($a > 7) {
-                   array_push($approvedPrograms, $school_pages[1][$a]);
+                   array_push($approvedPrograms, trim($school_pages[1][$a]));
                  }
                }
 
-               $approvedPrograms = implode(',', preg_replace('/<strong>|<\/strong>/', '', $approvedPrograms));
-               $school_check_SQL = mysqli_query($conn, "SELECT * FROM BPPE1 WHERE school_code='$schoolCode'");
+               $comp_approved_programs = sort($approvedPrograms);
+               $approved_programs_scrape = implode(',', preg_replace('/<strong>|<\/strong>/', '', $approvedPrograms));
+               $school_check_SQL =  "SELECT * FROM BPPE1 WHERE school_code='$school_code_scrape'";
+               $school_check_Result = mysqli_query($conn, $school_check_SQL);
 
-               if(mysqli_num_rows($school_check_SQL) > 0) {
-                 $same_school++;
+               if(mysqli_num_rows($school_check_Result) > 0) {
+                 include('compare.php');
                }
                else {
                  $all_school_info_SQL = "INSERT INTO BPPE1 (school, phone, school_code, county, mailing_address, physical_address, approved_programs)
-                                         VALUES ('$school', '$new_phone', '$schoolCode', '$county', '$mailingAddress', '$physicalAddress', '$approvedPrograms')";
+                                         VALUES ('$school_scrape', '$new_phone', '$school_code_scrape', '$county_scrape', '$mailing_address_scrape', '$physical_address_scrape', '$approved_programs_scrape')";
                  $all_school_info_Result = mysqli_query($conn, $all_school_info_SQL);
+
+                 $all_school_info_scrape_SQL = "INSERT INTO BPPE1_Scrape (school, phone, school_code, county, mailing_address, physical_address, approved_programs)
+                                                VALUES ('$school_scrape', '$new_phone', '$school_code_scrape', '$county_scrape', '$mailing_address_scrape', '$physical_address_scrape', '$approved_programs_scrape')";
+                 $all_school_info_scrape_Result = mysqli_query($conn, $all_school_info_scrape_SQL);
 
                  $newSchool++;
                  $newPhoneNumber++;
-                 $newCity++;
                  $newCounty++;
                  $newMailingAddress++;
                  $newPhysicalAddress++;
+                 $new_approved_program++;
                  ?>
                  <tr>
-                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $school; ?></td>
+                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $school_scrape; ?></td>
                    <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $new_phone; ?></td>
-                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $county; ?></td>
-                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $mailingAddress; ?></td>
-                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $physicalAddress; ?></td>
-                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $approvedPrograms; ?></td>
+                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $county_scrape; ?></td>
+                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $mailing_address_scrape; ?></td>
+                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $physical_address_scrape; ?></td>
+                   <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $approved_programs_scrape; ?></td>
                  </tr>
                  <?php
                }
@@ -113,33 +124,20 @@ ini_set('display_errors', '1');
          curl_close($curl);
 
         if(isset($_POST['export_csv'])) {
-
-          for($csv1 = 0; $csv1 <= COUNT($school); $csv1++) {
-            $csv_array = array($school[$csv1], $new_phone[$csv1], $county[$csv1], $mailingAddress[$csv1], $physicalAddress[$csv1], $approvedPrograms[$csv1]);
-            header('Content-Type: text/csv; charset=utf-8');
-            header('Content-Disposition: attachment; filename=schoolData.csv');
-            $output = fopen("php://output", "w");
-            fputcsv($output, $csv_array);
-            ?>
-            <tr>
-              <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $school[$csv1]; ?></td>
-              <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $new_phone[$csv1]; ?></td>
-              <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $county[$csv1]; ?></td>
-              <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $mailingAddress[$csv1]; ?></td>
-              <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $physicalAddress[$csv1]; ?></td>
-              <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $approvedPrograms[$csv1]; ?></td>
-            </tr>
-            <?php
-          }
-          fclose($output);
+          include('export_csv.php');
         }
 
       }//END IF ISSET
 
       if(mysqli_affected_rows($conn) > 0) {
-        echo "<h3>" .$newSchool . " Schools detals have been entered</h3>";
-        echo "<h3>" .$same_school . " Schools that where the same</h3>";
-        echo "<h3>" .$total . " Total Scraped</h3>";
+        echo "<h4>" . $newSchool . " School details have been changed</h4>";
+        echo "<h4>" . $newPhoneNumber . " New phone numbers</h4>";
+        echo "<h4>" . $newCounty . " New counties</h4>";
+        echo "<h4>" . $newMailingAddress . " New mailing addresses</h4>";
+        echo "<h4>" . $newPhysicalAddress . " New physical addresses</h4>";
+        echo "<h4>" . $new_approved_program . " New approved programs</h4>";
+        echo "<h4>" . $same_school . " Schools remained the same</h4>";
+        echo "<h4>" . $total . " Schools checked</h4>";
       }
       else {
         echo "No info has been entered";
@@ -147,8 +145,20 @@ ini_set('display_errors', '1');
       mysqli_close($conn);
 
     }
-    else {
-        echo '<h1 style="text-align: center; font-family: Garmond;">Results displayed here</h1>';
-    }
+    else { ?>
+      <div class="col-md-12" style="height: 100%; border: 2px solid grey;">
+        <h2 style="text-align: center;">School Results</h2>
+        <table class="table table-striper table-hover dataTable">
+          <thead style="font-weight: bold; font-size: 115%;" class="text-center">
+            <tr>
+              <td style="border: 1px solid black;" scope="col">School</td>
+              <td style="border: 1px solid black;" scope="col">Phone</td>
+              <td style="border: 1px solid black;" scope="col">County</td>
+              <td style="border: 1px solid black;" scope="col">Mailing Address</td>
+              <td style="border: 1px solid black;" scope="col">Physical Address</td>
+              <td style="border: 1px solid black;" scope="col">Approved Programs</td>
+            </tr>
+          </thead>
+  <?php }
   echo "</tbody></table>";
 ?>

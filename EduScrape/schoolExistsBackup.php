@@ -30,7 +30,7 @@ while($school_Row = mysqli_fetch_assoc($school_check_Var)) {
         else {
 
           if($current_phone == NULL) {
-            $phone_info_SQL = "UPDATE `BPPE1` SET `phone` = $new_phone' WHERE `BPPE1`.`id` = '$school_id'";
+            $phone_info_SQL = "UPDATE `BPPE1` SET `phone` = '$new_phone' WHERE `BPPE1`.`id` = '$school_id'";
             $phone_info_Result = mysqli_query($conn, $phone_info_SQL);
             $newPhoneNumber++; ?>
             <td scope="col" style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $new_phone; ?></td>
@@ -41,7 +41,7 @@ while($school_Row = mysqli_fetch_assoc($school_check_Var)) {
               <td scope="col" style="border: 1px solid black; font-size: 105%; font-weight: bold;"><?php echo $current_phone; ?></td>
       <?php
               if($current_county == NULL) {
-                $county_info_SQL = "UPDATE `BPPE1` SET `county` = $county_scrape' WHERE `BPPE1`.`id` = '$school_id'";
+                $county_info_SQL = "UPDATE `BPPE1` SET `county` = '$county_scrape' WHERE `BPPE1`.`id` = '$school_id'";
                 $county_info_Result = mysqli_query($conn, $county_info_SQL);
                 $newCounty++;?>
                 <td scope="col" style="border: 1px solid black; font-size: 105%; font-weight: bold;"><?php echo $county_scrape; ?></td>

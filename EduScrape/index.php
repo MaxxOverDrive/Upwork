@@ -23,18 +23,6 @@
 
 				<div class="col-md-4">
 
-          <form action="export_csv.php" method="POST">
-            <div class="form-group">
-              <div class="col-md-12 text-center">
-                <button class="btn btn-danger" type="submit" name="export_csv">Export CSV</button>
-              </div>
-            </div>
-          </form>
-
-        </div>
-
-				<div class="col-md-4">
-
           <form action="index.php" method="POST">
             <div class="form-group">
 							<div class="col-md-12 text-center">
@@ -47,6 +35,19 @@
           </form>
 
         </div>
+
+				<div class="col-md-4">
+
+          <form action="export_csv.php" method="POST">
+            <div class="form-group">
+              <div class="col-md-12 text-center">
+                <button class="btn btn-danger" type="submit" name="export_csv">Export CSV</button>
+              </div>
+            </div>
+          </form>
+
+        </div>
+
         <div style="margin-top: 1%;" class="col-md-12">
           <div style="height: 100%; border: 2px solid grey;">
 						<?php include('functions.php'); ?>
