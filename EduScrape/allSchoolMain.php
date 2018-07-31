@@ -1,15 +1,4 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', '1');
-
-
-
-$conn = mysqli_connect("$db_host", "$db_username", "$db_pass", "$db_name");
-
-if(!$conn) {
-  die("Connection Failed: " . mysqli_connect_error());
-}
-else {
 
 $url1 = "https://app.dca.ca.gov/bppe/view-voc-names.asp?schlname=&city=&county=&program=&program_keyword=&intJump=0&intRecords=2000";
 $ch = curl_init();
@@ -25,15 +14,17 @@ if(preg_match_all('/(.*?)<\/td>/', $result, $bppe1_matches)) {
 }
 curl_close($ch);
 
-$total = 0;
 $newSchool = 0;
 $newPhoneNumber = 0;
-$newCity = 0;
 $newCounty = 0;
 $newMailingAddress = 0;
 $newPhysicalAddress = 0;
+$new_approved_program = 0;
 $same_school = 0;
+$total = 0;
+
 $curl = curl_init();
+
 for($i = 18; $i < (COUNT($school_Row) - 3); $i++) {
   ini_set('memory_limit', '1024M');
   ini_set('max_execution_time', 300);
@@ -46,54 +37,60 @@ for($i = 18; $i < (COUNT($school_Row) - 3); $i++) {
     $school_result = curl_exec($curl);
 
     if(preg_match_all('/<td>([\s\S]*?)<\/td>/', $school_result, $school_pages)) {
-      $approved_programs = array();
+      $approvedPrograms = array();
       for($a = 0; $a < COUNT($school_pages[1]); $a++) {
-          $schoolName = trim($school_pages[1][0]);
-          $phone = trim($school_pages[1][1]);
+          $school_scrape = trim($school_pages[1][0]);
+          $phone_scrape = trim($school_pages[1][1]);
           $replace_array = array(')', '(', ' ');
-          $new_phone = trim(str_replace($replace_array, '', $phone));
-          $schoolCode = trim($school_pages[1][2]);
-          $county = trim($school_pages[1][3]);
-          $mailingAddress = trim(preg_replace('/&nbsp;|<br \/>/', '', $school_pages[1][4]));
-          $physicalAddress = trim(preg_replace('/&nbsp;|<br \/>/', '', $school_pages[1][5]));
+          $new_phone = trim(str_replace($replace_array, '', $phone_scrape));
+          $school_code_scrape = trim($school_pages[1][2]);
+          $county_scrape = trim($school_pages[1][3]);
+          $mailing_address_scrape = trim(preg_replace('/&nbsp;|<br \/>|\n/', '', $school_pages[1][4]));
+          $physical_address_scrape = trim(preg_replace('/&nbsp;|<br \/>|\n/', '', $school_pages[1][5]));
         if($a > 7) {
-          array_push($approved_programs, $school_pages[1][$a]);
+          array_push($approvedPrograms, trim($school_pages[1][$a]));
         }
       }
-      $approved_programs = implode(',', preg_replace('/<strong>|<\/strong>/', '', $approved_programs));
 
-      $school_check_SQL = mysqli_query($conn, "SELECT * FROM BPPE1 WHERE school_code='$schoolCode'");
+      $comp_approved_programs = sort($approvedPrograms);
+      $approved_programs_scrape = implode(',', preg_replace('/<strong>|<\/strong>/', '', $approvedPrograms));
+      $school_check_SQL =  "SELECT * FROM BPPE1_Scrape WHERE school_code='$school_code_scrape'";
+      $school_check_Result = mysqli_query($conn, $school_check_SQL);
 
-      if(mysqli_num_rows($school_check_SQL) > 0) {
-        $same_school++;
+      if(mysqli_num_rows($school_check_Result) > 0) {
+        include('compare.php');
       }
       else {
-        $all_school_info_SQL = "INSERT INTO BPPE1 (school, phone, school_code, county, mailing_address, physical_address, approved_programs)
-                                VALUES ('$schoolName', '$new_phone', '$schoolCode', '$county', '$mailingAddress', '$physicalAddress', '$approved_programs')";
-        $all_school_info_Result = mysqli_query($conn, $all_school_info_SQL);
+
+
+        $all_school_info_scrape_SQL = "INSERT INTO BPPE1_Scrape (school, phone, school_code, county, mailing_address, physical_address, approved_programs)
+                                       VALUES ('$school_scrape', '$new_phone', '$school_code_scrape', '$county_scrape', '$mailing_address_scrape', '$physical_address_scrape', '$approved_programs_scrape')";
+        $all_school_info_scrape_Result = mysqli_query($conn, $all_school_info_scrape_SQL);
 
         $newSchool++;
         $newPhoneNumber++;
-        $newCity++;
         $newCounty++;
         $newMailingAddress++;
         $newPhysicalAddress++;
+        $new_approved_program++;
+        /*
+        ?>
+        <tr>
+          <td><input type="checkbox" class="form-check-input" name="export_selected" value="<?php echo $tableRow['id']; ?>"></td>
+          <td style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $school_scrape; ?></td>
+          <td style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $new_phone; ?></td>
+          <td style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $county_scrape; ?></td>
+          <td style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $mailing_address_scrape; ?></td>
+          <td style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $physical_address_scrape; ?></td>
+          <td style="border: 1px solid black; color: red; font-size: 105%; font-weight: bold;"><?php echo $approved_programs_scrape; ?></td>
+        </tr>
+        <?php
+        */
       }
       $total++;
     }
   }
 }
 curl_close($curl);
-
-    if(mysqli_affected_rows($conn) > 0) {
-      echo "<h3>" .$newSchool . " Schools detals have been entered</h3>";
-      echo "<h3>" .$same_school . " Schools that where the same</h3>";
-      echo "<h3>" .$total . " Total Scraped</h3>";
-    }
-    else {
-      echo "No info has been entered";
-    }
-}
-mysqli_close($conn);
 
 ?>
